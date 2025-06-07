@@ -7,11 +7,12 @@
 #include <linux/of.h>
 #include <linux/device.h>
 #include <linux/uaccess.h>
+#include <linux/delay.h>
 
 
 #define DEVICE_NAME "rpi_gpio"
 #define CLASS_NAME "my_gpio"
-#define BUFFER_SIZE 64
+#define BUFFER_SIZE 14
 
 static dev_t devnum; 		// Global variable for the first device number
 static struct cdev c_dev; 	// Global variable for the character device structure
@@ -124,7 +125,7 @@ static ssize_t my_write(struct file *f, const char __user *buf, size_t len, loff
     /* Muestreamos BUFFER_SIZE veces rápidamente */
     for (i = 0; i < BUFFER_SIZE; i++) {
         sample_buf[i] = gpiod_get_value(active_gpio) ? '1' : '0';
-        //udelay(10);
+        msleep(100);
     }
 
     return len;
@@ -132,7 +133,7 @@ static ssize_t my_write(struct file *f, const char __user *buf, size_t len, loff
 
 static ssize_t my_read(struct file *f, char __user *buf, size_t len, loff_t *off)
 {
-    ssize_t to_copy = min(buf_len - *off, len);
+    ssize_t to_copy = min_t(ssize_t,buf_len - *off, len);
 
     if (to_copy <= 0)
         return 0;
@@ -163,7 +164,7 @@ static int __init drv_init(void)
     if ((ret = alloc_chrdev_region(&devnum, 0, 1, DEVICE_NAME)) < 0)
         return ret;
 
-    cl = class_create(CLASS_NAME);
+    cl = class_create(THIS_MODULE,CLASS_NAME);
     if (IS_ERR(cl)) {
         unregister_chrdev_region(devnum, 1);
         return PTR_ERR(cl);
