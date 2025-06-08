@@ -5,9 +5,10 @@ from time import sleep
 RUTACDD = "/dev/rpi_gpio"
 TIEMPO_SENSADO = 5
 def graficar_signal(muestras):
-
+    print("Cadena recibida:", repr(muestras))
      # Convertir la cadena de bits en una lista de enteros
     signal = [int(bit) for bit in muestras]
+    print("Señal como ints: ", signal)
     
     # Generar el eje de tiempo basado en el intervalo de 0.1 segundos
     time = np.linspace(0, 0.1 * len(signal), len(signal))
