@@ -37,9 +37,8 @@ def main():
     while opcion != "exit":
         if opcion in ("0", "1"):
             #elegir_signal(opcion)
-            sleep(TIEMPO_SENSADO+1)
             graficar_signal(recibir_signal())
-            os.system("xdg-open grafica.png")
+            print("Gráfica guardada en grafica.png")
         else:
             print("Opción inválida. Por favor, ingresa '0', '1' o 'exit'.")
         
