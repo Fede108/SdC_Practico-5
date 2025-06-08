@@ -50,16 +50,21 @@ def recibir_signal(opcion):
     return muestras
 
 def main():
-    opcion = input("¿Qué señal se desea sensar? (0, 1, exit): ")
-    while opcion != "exit":
+    while True:
+        opcion = input("¿Qué señal se desea sensar? (0, 1, exit): ")
+        if opcion == "exit":
+            break
+
         if opcion in ("0", "1"):
-            #elegir_signal(opcion)
-            graficar_signal(recibir_signal(opcion))
-            print("Gráfica guardada en grafica.png")
+            muestras = recibir_signal(opcion)
+            if muestras:  
+                graficar_signal(muestras)
+                print("Gráfica guardada en grafica.png")
+            else:
+                print("No se recibió ninguna muestra válida; no se guardó gráfica.")
         else:
             print("Opción inválida. Por favor, ingresa '0', '1' o 'exit'.")
-        
-        opcion = input("¿Qué señal quieres sensar? (0, 1, exit): ")
+
 
 
 if __name__ == "__main__":
