@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os 
 from time import sleep
-RUTACDD = "./cdd.txt"
+RUTACDD = "/dev/rpi_gpio"
 TIEMPO_SENSADO = 5
 def graficar_signal(muestras):
 
@@ -23,27 +23,42 @@ def graficar_signal(muestras):
 def elegir_signal(opcion):
     os.system("echo " + "'" + opcion + "'" +  "> "+ RUTACDD)
 
-def recibir_signal():
+def escribir_gpio(valor: str):
     try:
-        with open(RUTACDD, "r") as file:
-            muestras = file.read().strip()  # Leer el contenido y eliminar espacios en blanco
-        return muestras
+        with open("/dev/rpi_gpio", "w") as f:
+            f.write(valor)
+            f.flush()   # asegurar que se manda al dispositivo
+    except PermissionError:
+        print("¡Permisos insuficientes! Prueba con sudo o ajusta los permisos de /dev/rpi_gpio")
+
+def leer_gpio() -> str:
+    try:
+        with open("/dev/rpi_gpio", "r") as f:
+            estado = f.read().strip()
+        return estado
     except FileNotFoundError:
-        print(f"El archivo {RUTACDD} no existe.")
-        return None
+        print("No existe /dev/rpi_gpio. ¿Está cargado tu driver?")
+        return ""
+    except PermissionError:
+        print("¡Permisos insuficientes para leer /dev/rpi_gpio!")
+        return ""
+
+def recibir_signal(opcion):
+    escribir_gpio(opcion)
+    muestras = leer_gpio()  
+    return muestras
 
 def main():
     opcion = input("¿Qué señal se desea sensar? (0, 1, exit): ")
     while opcion != "exit":
         if opcion in ("0", "1"):
             #elegir_signal(opcion)
-            graficar_signal(recibir_signal())
+            graficar_signal(recibir_signal(opcion))
             print("Gráfica guardada en grafica.png")
         else:
             print("Opción inválida. Por favor, ingresa '0', '1' o 'exit'.")
         
         opcion = input("¿Qué señal quieres sensar? (0, 1, exit): ")
-
 
 
 if __name__ == "__main__":
