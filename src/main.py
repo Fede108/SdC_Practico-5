@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 RUTACDD = "/dev/rpi_gpio"
 
-def graficar_signal(muestras):
+def graficar_signal(muestras,opcion):
     print("Cadena recibida:", repr(muestras))
     # Convertir la cadena de bits en una lista de enteros
     signal = [int(bit) for bit in muestras]
@@ -12,13 +12,16 @@ def graficar_signal(muestras):
     # Generar el eje de tiempo basado en el intervalo de 0.1 segundos
     time = np.arange(0, len(signal)*0.01, 0.01)
 
+    # Crear figura nueva
+    plt.figure()
     # Graficar la señal
     plt.step(time, signal, where='post') 
-    plt.title("Señal Binaria")
+    plt.title("Señal Binaria " + opcion)
     plt.xlabel("Tiempo (s)")
     plt.ylabel("Amplitud")
     plt.grid()
     plt.savefig("grafica.png")
+    plt.close()
 
 
 def escribir_gpio(valor: str):
@@ -56,7 +59,7 @@ def main():
         if opcion in ("0", "1"):
             muestras = recibir_signal(opcion)
             if muestras:  
-                graficar_signal(muestras)
+                graficar_signal(muestras,opcion)
                 print("Gráfica guardada en grafica.png")
             else:
                 print("No se recibió ninguna muestra válida; no se guardó gráfica.")
