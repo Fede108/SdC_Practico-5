@@ -126,7 +126,11 @@ static ssize_t my_write(struct file *f, const char __user *buf, size_t len, loff
     /* Muestreamos BUFFER_SIZE veces rápidamente */
     for (i = 0; i < BUFFER_SIZE; i++) {
         sample_buf[i] = gpiod_get_value(active_gpio) ? '1' : '0';
+<<<<<<< HEAD
         msleep(100);
+=======
+        msleep(100);  
+>>>>>>> 86e187682b32769c6660bb121520bb3dc5dec371
     }
 
     return len;
