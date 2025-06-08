@@ -26,6 +26,7 @@ def elegir_signal(opcion):
 def escribir_gpio(valor: str):
     try:
         with open("/dev/rpi_gpio", "w") as f:
+            print("leyendo señal")
             f.write(valor)
             f.flush()   # asegurar que se manda al dispositivo
     except PermissionError:
