@@ -13,26 +13,19 @@
 
 #define DEVICE_NAME "rpi_gpio"
 #define CLASS_NAME "my_gpio"
-#define BUFFER_SIZE 14
+#define BUFFER_SIZE 100
 
 static dev_t devnum; 		// Global variable for the first device number
 static struct cdev c_dev; 	// Global variable for the character device structure
 static struct class *cl; 	// Global variable for the device class
 
 
-//class_create() /* creates a class for your devices visible in /sys/class/ */
-//class_destroy() /* removes the class */
-//device_create() /* creates a device node in the /dev directory */
-//device_destroy() /* removes a device node in the /dev directory */
-
 /* gpios variables*/
 struct gpio_desc *in0, *in1;
-
 
 /* Buffer para muestrear la señal */
 static unsigned char sample_buf[BUFFER_SIZE];
 static size_t buf_len = BUFFER_SIZE;
-
 
 /* declarations probe and remove fuctions */
 static int my_driver_probe(struct platform_device *pdev);
@@ -123,10 +116,10 @@ static ssize_t my_write(struct file *f, const char __user *buf, size_t len, loff
             return -EINVAL;
     }
 
-    /* Muestreamos BUFFER_SIZE veces rápidamente */
+    /* muestreamos BUFFER_SIZE veces */
     for (i = 0; i < BUFFER_SIZE; i++) {
         sample_buf[i] = gpiod_get_value(active_gpio) ? '1' : '0';
-        msleep(100);  
+        usleep_range(10000, 11000);  
     }
 
     return len;
@@ -165,12 +158,14 @@ static int __init drv_init(void)
     if ((ret = alloc_chrdev_region(&devnum, 0, 1, DEVICE_NAME)) < 0)
         return ret;
 
+    /* creates a class for your devices visible in /sys/class/ */
     cl = class_create(THIS_MODULE,CLASS_NAME);
     if (IS_ERR(cl)) {
         unregister_chrdev_region(devnum, 1);
         return PTR_ERR(cl);
     }
 
+    /* creates a device node in the /dev directory */
     dev_ret = device_create(cl, NULL, devnum, NULL, DEVICE_NAME);
     if (IS_ERR(dev_ret)) {
         class_destroy(cl);
@@ -181,7 +176,7 @@ static int __init drv_init(void)
     cdev_init(&c_dev, &pugs_fops);
     if ((ret = cdev_add(&c_dev, devnum, 1)) < 0) {
         device_destroy(cl, devnum);
-        class_destroy(cl);
+        class_destroy(cl);    
         unregister_chrdev_region(devnum, 1);
         return ret;
     }
