@@ -10,6 +10,7 @@
 #include <linux/delay.h>
 
 
+
 #define DEVICE_NAME "rpi_gpio"
 #define CLASS_NAME "my_gpio"
 #define BUFFER_SIZE 14
@@ -133,7 +134,7 @@ static ssize_t my_write(struct file *f, const char __user *buf, size_t len, loff
 
 static ssize_t my_read(struct file *f, char __user *buf, size_t len, loff_t *off)
 {
-    ssize_t to_copy = min_t(ssize_t,buf_len - *off, len);
+    ssize_t to_copy = min_t(ssize_t, buf_len - *off, len);
 
     if (to_copy <= 0)
         return 0;
