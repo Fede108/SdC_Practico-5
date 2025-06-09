@@ -1,50 +1,70 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import os 
-from time import sleep
-RUTACDD = "./cdd.txt"
-TIEMPO_SENSADO = 5
-def graficar_signal(muestras):
 
-     # Convertir la cadena de bits en una lista de enteros
+RUTACDD = "/dev/rpi_gpio"
+
+def graficar_signal(muestras,opcion):
+    print("Cadena recibida:", repr(muestras))
+    # Convertir la cadena de bits en una lista de enteros
     signal = [int(bit) for bit in muestras]
+    print("Señal como ints: ", signal)
     
     # Generar el eje de tiempo basado en el intervalo de 0.1 segundos
-    time = np.linspace(0, 0.1 * len(signal), len(signal))
-    
+    time = np.arange(0, len(signal)*0.01, 0.01)
+
+    # Crear figura nueva
+    plt.figure()
     # Graficar la señal
     plt.step(time, signal, where='post') 
-    plt.title("Señal Binaria")
+    plt.title("Señal Binaria " + opcion)
     plt.xlabel("Tiempo (s)")
     plt.ylabel("Amplitud")
     plt.grid()
     plt.savefig("grafica.png")
+    plt.close()
 
-def elegir_signal(opcion):
-    os.system("echo " + "'" + opcion + "'" +  "> "+ RUTACDD)
 
-def recibir_signal():
+def escribir_gpio(valor: str):
     try:
-        with open(RUTACDD, "r") as file:
-            muestras = file.read().strip()  # Leer el contenido y eliminar espacios en blanco
-        return muestras
+        with open("/dev/rpi_gpio", "w") as f:
+            print("leyendo señal")
+            f.write(valor)
+            f.flush()   
+    except PermissionError:
+        print("¡Permisos insuficientes! Prueba con sudo o ajusta los permisos de /dev/rpi_gpio")
+
+def leer_gpio() -> str:
+    try:
+        with open("/dev/rpi_gpio", "r") as f:
+            estado = f.read().strip()
+        return estado
     except FileNotFoundError:
-        print(f"El archivo {RUTACDD} no existe.")
-        return None
+        print("No existe /dev/rpi_gpio. ¿Está cargado tu driver?")
+        return ""
+    except PermissionError:
+        print("¡Permisos insuficientes para leer /dev/rpi_gpio!")
+        return ""
+
+def recibir_signal(opcion):
+    escribir_gpio(opcion)
+    muestras = leer_gpio()  
+    return muestras
 
 def main():
-    opcion = input("¿Qué señal se desea sensar? (0, 1, exit): ")
-    while opcion != "exit":
+    while True:
+        opcion = input("¿Qué señal se desea sensar? (0, 1, exit): ")
+        if opcion == "exit":
+            break
+
         if opcion in ("0", "1"):
-            #elegir_signal(opcion)
-            sleep(TIEMPO_SENSADO+1)
-            graficar_signal(recibir_signal())
-            os.system("xdg-open grafica.png")
+            muestras = recibir_signal(opcion)
+            if muestras:  
+                graficar_signal(muestras,opcion)
+                print("Gráfica guardada en grafica.png")
+            else:
+                print("No se recibió ninguna muestra válida; no se guardó gráfica.")
         else:
             print("Opción inválida. Por favor, ingresa '0', '1' o 'exit'.")
-        
-        opcion = input("¿Qué señal quieres sensar? (0, 1, exit): ")
-
 
 
 if __name__ == "__main__":
