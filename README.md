@@ -42,7 +42,7 @@ Este proyecto demuestra cómo interactuar con pines GPIO mediante un **driver de
 #### Character Device
 
 * Interfaz en `/dev/rpi_gpio`.
-* `my_write()`: selecciona GPIO a muestrear (0 o 1), inicia muestreo (10 lecturas con `msleep(100)`).
+* `my_write()`: selecciona GPIO a muestrear (0 o 1), inicia muestreo (100 lecturas).
 * `my_read()`: entrega el contenido de `sample_buf` al usuario (por ej. "0110101101").
 * `open()` y `release()`: operaciones básicas.
 
