@@ -1,1 +1,0 @@
-cmd_/home/pi/SdC_Practico-5/gpio_driver/drv.ko := ld -r -EL  -maarch64elf -z noexecstack --build-id=sha1  -T scripts/module.lds -o /home/pi/SdC_Practico-5/gpio_driver/drv.ko /home/pi/SdC_Practico-5/gpio_driver/drv.o /home/pi/SdC_Practico-5/gpio_driver/drv.mod.o;  true
